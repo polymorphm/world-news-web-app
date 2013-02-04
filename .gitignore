@@ -1,0 +1,8 @@
+# python
+__pycache__
+*.pyc
+*.pyo
+
+# gae
+/site-packages
+/app.yaml

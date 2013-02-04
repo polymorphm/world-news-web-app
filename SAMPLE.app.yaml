@@ -1,0 +1,13 @@
+application: world-news-devel
+version: devel
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+
+- url: /static
+  static_dir: lib_world_news_web_app_2013_02_04/static
+
+- url: /.*
+  script: start_world_news_web_app_2013_02_04.app
