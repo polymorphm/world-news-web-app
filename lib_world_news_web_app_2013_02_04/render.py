@@ -22,7 +22,7 @@ assert str is bytes
 import bottle
 
 def render(tpl_name, **kwargs):
-    template = bottle.request.settings['template_lookup'].get_template(tpl_name)
+    template = bottle.request.environ['app.template_lookup'].get_template(tpl_name)
     tpl_kwargs = {
             'request': bottle.request,
             }

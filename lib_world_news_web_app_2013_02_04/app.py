@@ -39,25 +39,21 @@ def create_app(root=None, static_root=None):
     
     template_lookup = mako_lookup.TemplateLookup(directories=(TEMPLATES_DIR, ))
     
-    def init_settings(callback):
-        def wrapper(*args, **kwargs):
-            bottle.request.settings = {
-                    'DEFAULT_TITLE': 'World News',
-                    'DEFAULT_DESCRIPTION': 'World News',
-                    'DEFAULT_KEYWORDS': 'news, world',
-                    'ROOT': root,
-                    'STATIC_ROOT': static_root,
-                    'STATIC_DIR': STATIC_DIR,
-                    'TEMPLATES_DIR': TEMPLATES_DIR,
-                    'template_lookup': template_lookup,
-                    }
-            
-            return callback(*args, **kwargs)
-        return wrapper
+    def init_settings():
+        bottle.request.environ.update({
+                'app.DEFAULT_TITLE': u'World News',
+                'app.DEFAULT_DESCRIPTION': u'World News',
+                'app.DEFAULT_KEYWORDS': u'news, world',
+                'app.ROOT': root,
+                'app.STATIC_ROOT': static_root,
+                'app.STATIC_DIR': STATIC_DIR,
+                'app.TEMPLATES_DIR': TEMPLATES_DIR,
+                'app.template_lookup': template_lookup,
+                })
     
     app = bottle.Bottle()
     
-    app.install(init_settings)
+    app.hooks.add('before_request', init_settings)
     
     app.route('%s/<filename:path>' % static_root, callback=send_static)
     app.route('%s/' % root, callback=home_view.home_view)

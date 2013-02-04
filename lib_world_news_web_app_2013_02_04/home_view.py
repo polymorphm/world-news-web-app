@@ -25,7 +25,7 @@ from . import render
 def home_view():
     return render.render(
             'home.mako',
-            home__title=bottle.request.settings['DEFAULT_TITLE'],
-            home__description=bottle.request.settings['DEFAULT_DESCRIPTION'],
-            home__keywords=bottle.request.settings['DEFAULT_KEYWORDS'],
+            home__title=bottle.request.environ['app.DEFAULT_TITLE'],
+            home__description=bottle.request.environ['app.DEFAULT_DESCRIPTION'],
+            home__keywords=bottle.request.environ['app.DEFAULT_KEYWORDS'],
             )

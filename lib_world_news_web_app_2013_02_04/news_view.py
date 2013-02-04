@@ -24,4 +24,4 @@ from . import render
 
 def news_view(path):
     # TEST TEST TEST
-    return u'фигня, %r!! [bottle.request.settings is %r]' % (path, bottle.request.settings)
+    return u'фигня, %r!! [bottle.request.environ is %r]' % (path, bottle.request.environ)
