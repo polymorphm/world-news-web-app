@@ -57,6 +57,6 @@ def create_app(root=None, static_root=None):
     
     app.route('%s/<filename:path>' % static_root, callback=send_static)
     app.route('%s/' % root, callback=home_view.home_view)
-    app.route('%s/<path:path>' % root, callback=news_view.news_view)
+    app.route('%s/news/<path:path>' % root, callback=news_view.news_view)
     
     return app
