@@ -20,12 +20,27 @@ assert unicode is not str
 assert str is bytes
 
 import bottle
+from google.appengine.api import users
 from . import render
 
+def dashboard_login_redirect():
+    login_url = users.create_login_url(dest_url='%s/dashboard' % bottle.request.environ['app.ROOT'])
+    
+    bottle.redirect(login_url)
+
 def home_view():
+    dashboard_login_redirect()
+
+def dashboard_view():
+    user = users.get_current_user()
+    if user is None:
+        dashboard_login_redirect()
+    user_email = user.email()
+    
     return render.render(
-            'home.mako',
-            home__title=bottle.request.environ['app.DEFAULT_TITLE'],
-            home__description=bottle.request.environ['app.DEFAULT_DESCRIPTION'],
-            home__keywords=bottle.request.environ['app.DEFAULT_KEYWORDS'],
+            'dashboard.mako',
+            dashboard__title=bottle.request.environ['app.DEFAULT_TITLE'],
+            dashboard__description=bottle.request.environ['app.DEFAULT_DESCRIPTION'],
+            dashboard__keywords=bottle.request.environ['app.DEFAULT_KEYWORDS'],
+            dashboard__user_email=user_email,
             )

@@ -22,7 +22,7 @@ assert str is bytes
 import os.path
 import bottle
 from mako import lookup as mako_lookup
-from . import home_view, news_view
+from . import dashboard_view, news_view
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), 'static')
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
@@ -65,7 +65,8 @@ def create_app(root=None, static_root=None):
     app.route('%s/<filename:path>' % static_root, callback=static_view)
     app.route('%s/favicon.ico' % root, callback=favicon_view)
     
-    app.route('%s/' % root, callback=home_view.home_view)
+    app.route('%s/' % root, callback=dashboard_view.home_view)
+    app.route('%s/dashboard' % root, callback=dashboard_view.dashboard_view)
     app.route('%s/news/<path:path>' % root, callback=news_view.news_view)
     
     return app
