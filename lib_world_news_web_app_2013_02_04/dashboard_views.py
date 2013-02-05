@@ -19,9 +19,10 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
-import base64, json
+import base64, urllib, json
 import bottle
 from google.appengine.api import users
+from google.appengine.api import urlfetch
 from . import render, news_views
 
 def dashboard_login_redirect():
@@ -96,11 +97,29 @@ def get_news_url_info_ajax():
     check_user_for_ajax()
     
     o_url = unicode(bottle.request.json.get('original_news_url'))
+    news_url = news_views.get_news_url(o_url)
+    news_key = base64.b64encode(news_views.get_news_key(o_url))
+    
+    try:
+        fres = urlfetch.fetch(
+                'http://clck.ru/--?%s' % urllib.urlencode({
+                        'url': news_url,
+                        }),
+                        validate_certificate=True,
+                )
+    except:
+        micro_news_url = None
+    else:
+        if fres.status_code == 200:
+            micro_news_url = fres.content.decode('utf-8', 'replace').strip()
+        else:
+            micro_news_url = None
     
     bottle.response.set_header('Content-Type', 'application/json;charset=utf-8')
     return json.dumps({
-            'news_url': news_views.get_news_url(o_url),
-            'news_key': base64.b64encode(news_views.get_news_key(o_url)),
+            'news_url': news_url,
+            'micro_news_url': micro_news_url,
+            'news_key': news_key,
             })
 
 def add_route(app, root):
