@@ -8,6 +8,7 @@
         <meta http-equiv="X-Ua-Compatible" content="chrome=1" />
         <script src="${request.environ['app.STATIC_ROOT']}/js/google_chrome_frame_for_microsoft_ie.js"></script>
         <title>${home__title}</title>
+        <link rel="shortcut icon" href="${request.environ['app.FAVICON']}" />
         <link rel="stylesheet" href="${request.environ['app.STATIC_ROOT']}/css/default.css" />
         <meta name="keywords" content="${home__keywords}" />
         <meta name="description" content="${home__description}" />

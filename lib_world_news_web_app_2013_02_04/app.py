@@ -27,11 +27,14 @@ from . import home_view, news_view
 STATIC_DIR = os.path.join(os.path.dirname(__file__), 'static')
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
-def send_static(filename):
+def static_view(filename):
     return bottle.static_file(
             filename,
-            root=bottle.request.settings['STATIC_DIR'],
+            root=bottle.request.environ['app.STATIC_DIR'],
             )
+
+def favicon_view():
+    bottle.redirect(bottle.request.environ['app.FAVICON'])
 
 def create_app(root=None, static_root=None):
     assert root is not None
@@ -41,21 +44,27 @@ def create_app(root=None, static_root=None):
     
     def init_settings():
         bottle.request.environ.update({
-                'app.DEFAULT_TITLE': u'World News',
-                'app.DEFAULT_DESCRIPTION': u'World News',
-                'app.DEFAULT_KEYWORDS': u'news, world',
                 'app.ROOT': root,
                 'app.STATIC_ROOT': static_root,
+                })
+        
+        bottle.request.environ.update({
                 'app.STATIC_DIR': STATIC_DIR,
                 'app.TEMPLATES_DIR': TEMPLATES_DIR,
                 'app.template_lookup': template_lookup,
+                'app.DEFAULT_TITLE': u'World News',
+                'app.DEFAULT_DESCRIPTION': u'World News',
+                'app.DEFAULT_KEYWORDS': u'news, world',
+                'app.FAVICON': '%s/favicon.png' % bottle.request.environ['app.STATIC_ROOT'],
                 })
     
     app = bottle.Bottle()
     
     app.hooks.add('before_request', init_settings)
     
-    app.route('%s/<filename:path>' % static_root, callback=send_static)
+    app.route('%s/<filename:path>' % static_root, callback=static_view)
+    app.route('%s/favicon.ico' % root, callback=favicon_view)
+    
     app.route('%s/' % root, callback=home_view.home_view)
     app.route('%s/news/<path:path>' % root, callback=news_view.news_view)
     
