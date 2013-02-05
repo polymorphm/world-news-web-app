@@ -87,9 +87,6 @@ def dashboard_view():
     
     return render.render(
             'dashboard.mako',
-            dashboard__title=bottle.request.environ['app.DEFAULT_TITLE'],
-            dashboard__description=bottle.request.environ['app.DEFAULT_DESCRIPTION'],
-            dashboard__keywords=bottle.request.environ['app.DEFAULT_KEYWORDS'],
             dashboard__user_email=user_email,
             dashboard__news_secret_key_b64=news_secret_key_b64,
             dashboard__key_example_for=key_example_for,
