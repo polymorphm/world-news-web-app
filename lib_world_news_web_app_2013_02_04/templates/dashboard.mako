@@ -19,6 +19,7 @@
     <body>
         <div class="page">
             <h1>Welcome to ${request.environ['app.DEFAULT_TITLE'] | h}!</h1>
+            <p><a href="${'%s/logout' % request.environ['app.ROOT'] | h}">Logout</a></p>
             <pre>user_email is <b>${dashboard__user_email | h}</b></pre>
         </div>
     </body>

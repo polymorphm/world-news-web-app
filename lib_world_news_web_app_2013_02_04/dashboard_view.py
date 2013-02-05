@@ -28,8 +28,10 @@ def dashboard_login_redirect():
     
     bottle.redirect(login_url)
 
-def home_view():
-    dashboard_login_redirect()
+def logout_redirect():
+    logout_url = users.create_logout_url(dest_url='%s/' % bottle.request.environ['app.ROOT'])
+    
+    bottle.redirect(logout_url)
 
 def dashboard_view():
     user = users.get_current_user()

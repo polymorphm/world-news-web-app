@@ -65,7 +65,8 @@ def create_app(root=None, static_root=None):
     app.route('%s/<filename:path>' % static_root, callback=static_view)
     app.route('%s/favicon.ico' % root, callback=favicon_view)
     
-    app.route('%s/' % root, callback=dashboard_view.home_view)
+    app.route('%s/' % root, callback=dashboard_view.dashboard_login_redirect)
+    app.route('%s/logout' % root, callback=dashboard_view.logout_redirect)
     app.route('%s/dashboard' % root, callback=dashboard_view.dashboard_view)
     app.route('%s/news/<path:path>' % root, callback=news_view.news_view)
     
