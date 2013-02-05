@@ -32,12 +32,28 @@ def logout_redirect():
     logout_url = users.create_logout_url(dest_url='%s/' % bottle.request.environ['app.ROOT'])
     
     bottle.redirect(logout_url)
+    
+def denied_view():
+    user = users.get_current_user()
+    if user is not None:
+        user_email = user.email()
+    else:
+        user_email = None
+    
+    return render.render(
+            'denied.mako',
+            denied__title='Access Denied',
+            denied__user_email=user_email,
+            )
 
 def dashboard_view():
     user = users.get_current_user()
     if user is None:
         dashboard_login_redirect()
     user_email = user.email()
+    
+    if user_email != 'plm@2123.1231':
+        bottle.redirect('%s/denied' % bottle.request.environ['app.ROOT'])
     
     return render.render(
             'dashboard.mako',
