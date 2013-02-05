@@ -33,7 +33,7 @@ def logout_redirect():
     logout_url = users.create_logout_url(dest_url='%s/' % bottle.request.environ['app.ROOT'])
     
     bottle.redirect(logout_url)
-    
+
 def denied_view():
     user = users.get_current_user()
     if user is not None:
