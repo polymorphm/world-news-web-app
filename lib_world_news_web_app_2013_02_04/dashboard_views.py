@@ -19,7 +19,7 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
-import base64
+import base64, json
 import bottle
 from google.appengine.api import users
 from . import render, news_views
@@ -95,10 +95,16 @@ def dashboard_view():
             dashboard__key_example_for=key_example_for,
             )
 
-def get_news_url_ajax():
+def get_news_url_info_ajax():
     check_user_for_ajax()
     
-    return '123123123123123'
+    o_url = unicode(bottle.request.json.get('original_news_url'))
+    
+    bottle.response.set_header('Content-Type', 'application/json;charset=utf-8')
+    return json.dumps({
+            'news_url': news_views.get_news_url(o_url),
+            'news_key': base64.b64encode(news_views.get_news_key(o_url)),
+            })
 
 def add_route(app, root):
     app.route('%s/' % root, callback=dashboard_login_redirect)
@@ -107,4 +113,4 @@ def add_route(app, root):
     app.route('%s/denied' % root, callback=denied_view)
     app.route('%s/dashboard' % root, callback=dashboard_view)
     
-    app.post('%s/ajax/get-news-url' % root, callback=get_news_url_ajax)
+    app.post('%s/ajax/get-news-url-info' % root, callback=get_news_url_info_ajax)

@@ -48,10 +48,10 @@ def get_news_key(original_news_url):
     return news_key
 
 def get_news_url(original_news_url):
-    o_scheme, o_netloc, o_path, o_params, o_query, o_fragment = \
-            urlparse.urlparse(original_news_url)
+    o_scheme, o_netloc, o_path, o_query, o_fragment = \
+            urlparse.urlsplit(original_news_url)
     
-    if not o_path.startswith('/'):
+    if o_path and not o_path.startswith('/'):
         o_path = '/%s' % o_path
     
     query_kwargs = {
@@ -81,9 +81,10 @@ def get_news_url(original_news_url):
     return news_url
 
 def news_view(path):
-    # TEST TEST TEST
-    assert 2 > 9
-    return u'фигня, %r!! [bottle.request.environ is %r]' % (path, bottle.request.environ)
+    bottle.response.set_header('Content-Type', 'text/plain;charset=utf-8')
+    return u'path is <<<%r>>>' % (path)
 
 def add_route(app, root):
-    app.route('%s/news/<path:path>' % root, callback=news_view)
+    app.route('%s/news' % root, callback=lambda: news_view(''))
+    app.route('%s/news/' % root, callback=lambda: news_view('/'))
+    app.route('%s/news/<path:path>' % root, callback=lambda path: news_view('/%s' % path))
