@@ -19,9 +19,10 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
+import base64
 import bottle
 from google.appengine.api import users
-from . import render
+from . import render, news_views
 
 def dashboard_login_redirect():
     login_url = users.create_login_url(dest_url='%s/dashboard' % bottle.request.environ['app.ROOT'])
@@ -50,10 +51,15 @@ def dashboard_view():
     user = users.get_current_user()
     if user is None:
         dashboard_login_redirect()
+    
     user_email = user.email()
     
-    if user_email != 'plm@2123.1231':
+    if user_email not in bottle.request.environ['app.ALLOW_ACCESS_LIST']:
         bottle.redirect('%s/denied' % bottle.request.environ['app.ROOT'])
+    
+    news_secret_key = news_views.get_news_secret_key()
+    news_secret_key_b64 = base64.b64encode(news_secret_key)
+    key_example_for = lambda url: base64.b64encode(news_views.get_news_key(url))
     
     return render.render(
             'dashboard.mako',
@@ -61,4 +67,6 @@ def dashboard_view():
             dashboard__description=bottle.request.environ['app.DEFAULT_DESCRIPTION'],
             dashboard__keywords=bottle.request.environ['app.DEFAULT_KEYWORDS'],
             dashboard__user_email=user_email,
+            dashboard__news_secret_key_b64=news_secret_key_b64,
+            dashboard__key_example_for=key_example_for,
             )

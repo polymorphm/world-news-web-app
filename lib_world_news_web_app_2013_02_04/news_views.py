@@ -19,8 +19,33 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
+import base64, hashlib, hmac
 import bottle
 from . import render
+
+NEWS_SECRET_KEY_HMAC_MSG = base64.b64decode(u'rBTSl12Y5W4wsvVB')
+
+def get_news_secret_key():
+    try:
+        return bottle.request.environ['app.NEWS_SECRET_KEY']
+    except KeyError:
+        pass
+    
+    initial_secret_key = bottle.request.environ['app.INITIAL_SECRET_KEY']
+    news_secret_key = hmac.new(
+            initial_secret_key,
+            NEWS_SECRET_KEY_HMAC_MSG,
+            hashlib.sha256,
+            ).digest()
+    
+    bottle.request.environ['app.NEWS_SECRET_KEY'] = news_secret_key
+    return news_secret_key
+
+def get_news_key(original_news_url):
+    news_secret_key = get_news_secret_key()
+    news_key = hmac.new(news_secret_key, original_news_url, hashlib.sha256).digest()
+    
+    return news_key
 
 def news_view(path):
     # TEST TEST TEST

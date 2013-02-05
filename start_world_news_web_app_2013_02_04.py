@@ -27,4 +27,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'site-packages'))
 from wsgiref import simple_server
 from lib_world_news_web_app_2013_02_04.app import create_app
 
-app = create_app(root='', static_root='/static')
+app = create_app(
+        root='',
+        static_root='/static',
+        config_file=os.path.join(os.path.dirname(__file__), 'world-news.cfg'),
+        )

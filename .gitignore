@@ -3,6 +3,9 @@ __pycache__
 *.pyc
 *.pyo
 
+# web-app
+/world-news.cfg
+
 # gae
 /site-packages
 /app.yaml

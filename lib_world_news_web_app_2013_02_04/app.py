@@ -19,7 +19,7 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
-import os.path
+import os.path, ConfigParser, base64
 import bottle
 from mako import lookup as mako_lookup
 from . import dashboard_views, news_views
@@ -36,9 +36,37 @@ def static_view(filename):
 def favicon_view():
     bottle.redirect(bottle.request.environ['app.FAVICON'])
 
-def create_app(root=None, static_root=None):
+class Config(object):
+    pass
+
+def get_config_allow_list(conf_parser):
+    if conf_parser.has_option('core', 'allow_access_list'):
+        allow_access_list = \
+                conf_parser.get('core', 'allow_access_list').decode('utf-8', 'replace')
+    else:
+        allow_access_list = u''
+    
+    allow_access_list = tuple(x.strip() for x in allow_access_list.split(','))
+    
+    return allow_access_list
+
+def get_config_initial_secret_key(conf_parser):
+    initial_secret_key = conf_parser.get('core', 'initial_secret_key').decode('utf-8', 'replace')
+    
+    initial_secret_key = base64.b64decode(initial_secret_key)
+    
+    return initial_secret_key
+
+def create_app(root=None, static_root=None, config_file=None):
     assert root is not None
     assert static_root is not None
+    assert config_file is not None
+    
+    conf_parser = ConfigParser.SafeConfigParser()
+    conf_parser.read(config_file)
+    
+    allow_access_list = get_config_allow_list(conf_parser)
+    initial_secret_key = get_config_initial_secret_key(conf_parser)
     
     template_lookup = mako_lookup.TemplateLookup(directories=(TEMPLATES_DIR, ))
     
@@ -46,6 +74,8 @@ def create_app(root=None, static_root=None):
         bottle.request.environ.update({
                 'app.ROOT': root,
                 'app.STATIC_ROOT': static_root,
+                'app.ALLOW_ACCESS_LIST': allow_access_list,
+                'app.INITIAL_SECRET_KEY': initial_secret_key,
                 })
         
         bottle.request.environ.update({
