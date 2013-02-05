@@ -19,7 +19,7 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
-import base64, hashlib, hmac
+import base64, hashlib, hmac, urlparse, urllib
 import bottle
 from . import render
 
@@ -47,7 +47,43 @@ def get_news_key(original_news_url):
     
     return news_key
 
+def get_news_url(original_news_url):
+    o_scheme, o_netloc, o_path, o_params, o_query, o_fragment = \
+            urlparse.urlparse(original_news_url)
+    
+    if not o_path.startswith('/'):
+        o_path = '/%s' % o_path
+    
+    query_kwargs = {
+            'netloc': o_netloc or 'localhost',
+            'key': base64.b64encode(get_news_key(original_news_url)),
+            }
+    
+    if o_scheme and o_scheme != 'http':
+        query_kwargs['scheme'] = o_scheme
+    
+    if o_query:
+        query_kwargs['query'] = o_query
+    
+    if o_fragment:
+        query_kwargs['fragment'] = o_fragment
+    
+    query = urllib.urlencode(query_kwargs)
+    
+    news_url = '%s://%s%s/news%s%s' % (
+            bottle.request.environ.get('wsgi.url_scheme') or 'http',
+            bottle.request.environ.get('HTTP_HOST') or 'localhost',
+            bottle.request.environ['app.ROOT'],
+            o_path,
+            '?%s' % query if query else '',
+            )
+    
+    return news_url
+
 def news_view(path):
     # TEST TEST TEST
     assert 2 > 9
     return u'фигня, %r!! [bottle.request.environ is %r]' % (path, bottle.request.environ)
+
+def add_route(app, root):
+    app.route('%s/news/<path:path>' % root, callback=news_view)

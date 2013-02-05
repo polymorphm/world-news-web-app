@@ -35,6 +35,8 @@ def logout_redirect():
     bottle.redirect(logout_url)
 
 def denied_view():
+    bottle.response.status = 403
+    
     user = users.get_current_user()
     if user is not None:
         user_email = user.email()
@@ -47,8 +49,9 @@ def denied_view():
             denied__user_email=user_email,
             )
 
-def dashboard_view():
+def check_user():
     user = users.get_current_user()
+    
     if user is None:
         dashboard_login_redirect()
     
@@ -56,6 +59,27 @@ def dashboard_view():
     
     if user_email not in bottle.request.environ['app.ALLOW_ACCESS_LIST']:
         bottle.redirect('%s/denied' % bottle.request.environ['app.ROOT'])
+    
+    return user_email
+
+def check_user_for_ajax():
+    if bottle.request.get_header('X-Requested-With') != 'XMLHttpRequest':
+        raise bottle.HTTPError(403)
+    
+    user = users.get_current_user()
+    
+    if user is None:
+        raise bottle.HTTPError(403)
+    
+    user_email = user.email()
+    
+    if user_email not in bottle.request.environ['app.ALLOW_ACCESS_LIST']:
+        raise bottle.HTTPError(403)
+    
+    return user_email
+
+def dashboard_view():
+    user_email = check_user()
     
     news_secret_key = news_views.get_news_secret_key()
     news_secret_key_b64 = base64.b64encode(news_secret_key)
@@ -70,3 +94,17 @@ def dashboard_view():
             dashboard__news_secret_key_b64=news_secret_key_b64,
             dashboard__key_example_for=key_example_for,
             )
+
+def get_news_url_ajax():
+    check_user_for_ajax()
+    
+    return '123123123123123'
+
+def add_route(app, root):
+    app.route('%s/' % root, callback=dashboard_login_redirect)
+    app.route('%s/login' % root, callback=dashboard_login_redirect)
+    app.route('%s/logout' % root, callback=logout_redirect)
+    app.route('%s/denied' % root, callback=denied_view)
+    app.route('%s/dashboard' % root, callback=dashboard_view)
+    
+    app.post('%s/ajax/get-news-url' % root, callback=get_news_url_ajax)

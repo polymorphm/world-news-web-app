@@ -95,11 +95,7 @@ def create_app(root=None, static_root=None, config_file=None):
     app.route('%s/<filename:path>' % static_root, callback=static_view)
     app.route('%s/favicon.ico' % root, callback=favicon_view)
     
-    app.route('%s/' % root, callback=dashboard_views.dashboard_login_redirect)
-    app.route('%s/login' % root, callback=dashboard_views.dashboard_login_redirect)
-    app.route('%s/logout' % root, callback=dashboard_views.logout_redirect)
-    app.route('%s/denied' % root, callback=dashboard_views.denied_view)
-    app.route('%s/dashboard' % root, callback=dashboard_views.dashboard_view)
-    app.route('%s/news/<path:path>' % root, callback=news_views.news_view)
+    dashboard_views.add_route(app, root)
+    news_views.add_route(app, root)
     
     return app
