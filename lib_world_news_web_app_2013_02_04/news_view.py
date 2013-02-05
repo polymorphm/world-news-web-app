@@ -24,4 +24,5 @@ from . import render
 
 def news_view(path):
     # TEST TEST TEST
+    assert 2 > 9
     return u'фигня, %r!! [bottle.request.environ is %r]' % (path, bottle.request.environ)
