@@ -26,7 +26,7 @@
             <pre>Example for "http://ya.ru/":</pre>
             <div style="margin-left: 4em; font-size: 0.7em">
                 <pre>base64(example_news_key) = hmap_sha256( base64_decode("${dashboard__news_secret_key_b64 | h}"), "http://ya.ru/")</pre>
-                <pre>base64(example_news_key) = "${dashboard__key_example_for('http://ya.ru/') | h}"</pre>
+                <pre>= "${dashboard__key_example_for('http://ya.ru/') | h}"</pre>
             </div>
         </div>
     </body>
