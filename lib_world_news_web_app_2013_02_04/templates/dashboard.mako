@@ -28,7 +28,7 @@
             <pre>Example for "http://example.org/page1?param2=value3":</pre>
             <div style="margin-left: 4em; font-size: 0.7em">
                 <pre>base64(example_news_key) = hmap_sha256( base64_decode("${dashboard__news_secret_key_b64 | h}"), "http://example.org/page1?param2=value3")</pre>
-                <pre>= "${dashboard__key_example_for('http://example.org/page1?param2=value3') | h}"</pre>
+                <pre>= "${dashboard__key_example_for('http://example.org/page1?param2=value3') | h}..." ### need first 6 bytes only</pre>
             </div>
         </div>
     </body>

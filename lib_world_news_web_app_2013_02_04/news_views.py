@@ -45,7 +45,7 @@ def get_news_key(original_news_url):
     news_secret_key = get_news_secret_key()
     news_key = hmac.new(news_secret_key, original_news_url, hashlib.sha256).digest()
     
-    return news_key
+    return news_key[:6]
 
 def get_news_url(original_news_url):
     o_scheme, o_netloc, o_path, o_query, o_fragment = \
