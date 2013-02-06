@@ -81,8 +81,28 @@ def get_news_url(original_news_url):
     return news_url
 
 def news_view(path):
+    o_scheme = bottle.request.params.get('scheme') or 'http'
+    o_netloc = bottle.request.params.get('netloc')
+    o_path = path
+    o_query = bottle.request.params.get('query')
+    o_fragment = bottle.request.params.get('fragment')
+    news_key_b64 = bottle.request.params.get('key')
+    try:
+        news_key = base64.b64decode(news_key_b64)
+    except (TypeError, ValueError):
+        news_key = None
+    
+    if not o_netloc:
+        raise bottle.HTTPError(404, 'News Not Found')
+    
+    o_url = urlparse.urlunsplit((o_scheme, o_netloc, o_path, o_query, o_fragment))
+    valid_news_key = get_news_key(o_url)
+    
+    if not news_key or valid_news_key != news_key:
+        raise bottle.HTTPError(403, 'Not a Valid News Key')
+    
     bottle.response.set_header('Content-Type', 'text/plain;charset=utf-8')
-    return u'path is <<<%r>>>' % (path)
+    return u'o_url is <<<%r>>>' % (o_url)
 
 def add_route(app, root):
     app.route('%s/news' % root, callback=lambda: news_view(''))
