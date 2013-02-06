@@ -45,7 +45,6 @@ def denied_view():
     
     return render.render(
             'denied.mako',
-            denied__title='Access Denied',
             denied__user_email=user_email,
             )
 

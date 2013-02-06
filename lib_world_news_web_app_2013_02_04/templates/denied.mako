@@ -7,7 +7,7 @@
         <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
         <meta http-equiv="X-Ua-Compatible" content="chrome=1" />
         <script src="${request.environ['app.STATIC_ROOT'] | h}/js/google_chrome_frame_for_microsoft_ie.js"></script>
-        <title>${denied__title | h}</title>
+        <title>Access Denied | ${request.environ['app.DEFAULT_TITLE'] | h}</title>
         <link rel="shortcut icon" href="${request.environ['app.FAVICON'] | h}" />
         <link rel="stylesheet" href="${request.environ['app.STATIC_ROOT'] | h}/css/default.css" />
         <meta name="app_default_title" content="${request.environ['app.DEFAULT_TITLE'] | h}" />
