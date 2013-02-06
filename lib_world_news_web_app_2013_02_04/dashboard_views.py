@@ -59,14 +59,11 @@ def get_news_url_info_ajax():
     news_url = news_views.get_news_url(o_url)
     news_key = base64.b64encode(news_views.get_news_key(o_url))
     
-    try:
-        fetch_data = cached_fetch.cached_fetch(
-                'http://clck.ru/--?%s' % urllib.urlencode({
-                        'url': news_url,
-                        }),
-                )
-    except:
-        fetch_data = None
+    fetch_data = cached_fetch.cached_fetch(
+            'http://clck.ru/--?%s' % urllib.urlencode({
+                    'url': news_url,
+                    }),
+            )
     
     if fetch_data is not None and fetch_data['status_code'] == 200:
         micro_news_url = fetch_data['content'].decode('utf-8', 'replace').strip()
