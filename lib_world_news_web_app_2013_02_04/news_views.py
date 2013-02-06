@@ -23,7 +23,7 @@ import base64, hashlib, hmac, urlparse, urllib
 import bottle
 from . import render
 
-NEWS_SECRET_KEY_HMAC_MSG = base64.b64decode(u'rBTSl12Y5W4wsvVB')
+NEWS_SECRET_KEY_HMAC_MSG = base64.b64decode(u'rBTSl12Y5W4wsvVB') # magic
 
 def get_news_secret_key():
     try:
