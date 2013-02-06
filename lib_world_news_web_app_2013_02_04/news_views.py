@@ -21,7 +21,7 @@ assert str is bytes
 
 import base64, hashlib, hmac, urlparse, urllib
 import bottle
-from . import render
+from . import render, cached_fetch
 
 NEWS_SECRET_KEY_HMAC_MSG = base64.b64decode(u'rBTSl12Y5W4wsvVB') # magic
 
@@ -80,6 +80,43 @@ def get_news_url(original_news_url):
     
     return news_url
 
+def fetch_data_content_type(fetch_data):
+    return fetch_data['headers'].get('content-type')
+
+def fetch_data_is_html(fetch_data):
+    ct = fetch_data_content_type(fetch_data)
+    
+    if ct is None:
+        return False
+    
+    if ct == 'text/html' or ct.startswith('text/html;'):
+        return True
+    
+    return False
+
+def news_injection_proc(fetch_data):
+    if not fetch_data_is_html(fetch_data):
+        return
+    
+    fetch_data['content'] = '%s\n\n##### TEST #####\n\n%s' % (
+            fetch_data['content'],
+            bottle.request.environ['app.NEWS_INJECTION_HTML'].encode('utf-8', 'replace'),
+            )
+
+def news_injection_cache_ns():
+    hmac_key = base64.b64decode(u'zZzw63lJ0XYVV7as') # magic
+    hmac_msg = bottle.request.environ['app.NEWS_INJECTION_HTML']
+    
+    cache_ns = base64.b64encode(
+            hmac.new(
+                    hmac_key,
+                    hmac_msg,
+                    hashlib.sha256,
+                    ).digest(),
+            )
+    
+    return cache_ns
+
 def news_view(path):
     o_scheme = bottle.request.params.get('scheme') or 'http'
     o_netloc = bottle.request.params.get('netloc')
@@ -93,7 +130,7 @@ def news_view(path):
         news_key = None
     
     if not o_netloc:
-        raise bottle.HTTPError(404, 'News Not Found')
+        raise bottle.HTTPError(404, 'News Not Found (no netloc)')
     
     o_url = urlparse.urlunsplit((o_scheme, o_netloc, o_path, o_query, o_fragment))
     valid_news_key = get_news_key(o_url)
@@ -101,8 +138,20 @@ def news_view(path):
     if not news_key or valid_news_key != news_key:
         raise bottle.HTTPError(403, 'Not a Valid News Key')
     
-    bottle.response.set_header('Content-Type', 'text/plain;charset=utf-8')
-    return u'o_url is <<<%r>>>\n\n%s' % (o_url, bottle.request.environ['app.NEWS_INJECTION_HTML'])
+    fetch_data = cached_fetch.cached_fetch(
+            o_url,
+            proc_func=news_injection_proc,
+            cache_namespace=news_injection_cache_ns()
+            )
+    
+    if fetch_data is None or not fetch_data_is_html(fetch_data):
+        raise bottle.HTTPError(404, 'News Not Found (no html)')
+    
+    content_type = fetch_data_content_type(fetch_data)
+    content = fetch_data['content']
+    
+    bottle.response.set_header('Content-Type', content_type)
+    return content
 
 def add_route(app, root):
     app.route('%s/news' % root, callback=lambda: news_view(''))
