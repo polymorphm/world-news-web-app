@@ -27,9 +27,14 @@ FETCH_DATA_MEMCACHE_NS = 'KCwgwkO1GubMHh9t' # magic
 class CacheFetchError(Exception):
     pass
 
-def cached_fetch(url, proc_func=None):
+def cached_fetch(url, proc_func=None, cache_namespace=None):
+    assert proc_func is None or cache_namespace is not None
+    
+    if cache_namespace is None:
+        cache_namespace = FETCH_DATA_MEMCACHE_NS
+    
     fetch_data_key = hashlib.sha256(url).hexdigest()
-    fetch_data = memcache.get(fetch_data_key, namespace=FETCH_DATA_MEMCACHE_NS)
+    fetch_data = memcache.get(fetch_data_key, namespace=cache_namespace)
     
     if fetch_data is not None:
         return fetch_data
@@ -52,6 +57,6 @@ def cached_fetch(url, proc_func=None):
     if proc_func is not None:
         proc_func(fetch_data)
     
-    memcache.add(fetch_data_key, fetch_data, namespace=FETCH_DATA_MEMCACHE_NS)
+    memcache.add(fetch_data_key, fetch_data, namespace=cache_namespace)
     
     return fetch_data
