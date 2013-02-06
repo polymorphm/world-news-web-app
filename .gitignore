@@ -4,6 +4,7 @@ __pycache__
 *.pyo
 
 # web-app
+/start_world_news_web_app_2013_02_04.py
 /world-news.cfg
 
 # gae
