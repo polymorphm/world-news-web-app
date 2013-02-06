@@ -22,8 +22,7 @@ assert str is bytes
 import base64, urllib, json
 import bottle
 from google.appengine.api import users
-from google.appengine.api import urlfetch
-from . import render, news_views
+from . import render, cached_fetch, news_views
 
 def dashboard_login_redirect():
     login_url = users.create_login_url(dest_url='%s/dashboard' % bottle.request.environ['app.ROOT'])
@@ -101,19 +100,18 @@ def get_news_url_info_ajax():
     news_key = base64.b64encode(news_views.get_news_key(o_url))
     
     try:
-        fres = urlfetch.fetch(
+        fetch_data = cached_fetch.cached_fetch(
                 'http://clck.ru/--?%s' % urllib.urlencode({
                         'url': news_url,
                         }),
-                        validate_certificate=True,
                 )
     except:
-        micro_news_url = None
+        fetch_data = None
+    
+    if fetch_data is not None and fetch_data['status_code'] == 200:
+        micro_news_url = fetch_data['content'].decode('utf-8', 'replace').strip()
     else:
-        if fres.status_code == 200:
-            micro_news_url = fres.content.decode('utf-8', 'replace').strip()
-        else:
-            micro_news_url = None
+        micro_news_url = None
     
     bottle.response.set_header('Content-Type', 'application/json;charset=utf-8')
     return json.dumps({
