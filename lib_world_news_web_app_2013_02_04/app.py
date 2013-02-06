@@ -39,7 +39,7 @@ def favicon_view():
 class Config(object):
     pass
 
-def get_config_allow_list(conf_parser):
+def get_config_allow_list(conf_parser, config_file):
     if conf_parser.has_option('core', 'allow_access_list'):
         allow_access_list = \
                 conf_parser.get('core', 'allow_access_list').decode('utf-8', 'replace')
@@ -50,12 +50,29 @@ def get_config_allow_list(conf_parser):
     
     return allow_access_list
 
-def get_config_initial_secret_key(conf_parser):
+def get_config_initial_secret_key(conf_parser, config_file):
     initial_secret_key = conf_parser.get('core', 'initial_secret_key').decode('utf-8', 'replace')
     
     initial_secret_key = base64.b64decode(initial_secret_key)
     
     return initial_secret_key
+
+def get_news_injection_html(conf_parser, config_file):
+    if not conf_parser.has_option('core', 'news_injection_file'):
+        return u''
+    
+    news_injection_file = \
+            conf_parser.get('core', 'news_injection_file').decode('utf-8', 'replace')
+    
+    news_injection_file = os.path.join(
+            os.path.dirname(config_file),
+            news_injection_file,
+            )
+    
+    with open(news_injection_file, 'rb') as fd:
+        news_injection_html = fd.read().decode('utf-8', 'replace')
+    
+    return news_injection_html
 
 def create_app(root=None, static_root=None, config_file=None):
     assert root is not None
@@ -65,8 +82,9 @@ def create_app(root=None, static_root=None, config_file=None):
     conf_parser = ConfigParser.SafeConfigParser()
     conf_parser.read(config_file)
     
-    allow_access_list = get_config_allow_list(conf_parser)
-    initial_secret_key = get_config_initial_secret_key(conf_parser)
+    allow_access_list = get_config_allow_list(conf_parser, config_file)
+    initial_secret_key = get_config_initial_secret_key(conf_parser, config_file)
+    news_injection_html = get_news_injection_html(conf_parser, config_file)
     
     template_lookup = mako_lookup.TemplateLookup(directories=(TEMPLATES_DIR, ))
     
@@ -76,6 +94,7 @@ def create_app(root=None, static_root=None, config_file=None):
                 'app.STATIC_ROOT': static_root,
                 'app.ALLOW_ACCESS_LIST': allow_access_list,
                 'app.INITIAL_SECRET_KEY': initial_secret_key,
+                'app.NEWS_INJECTION_HTML': news_injection_html,
                 })
         
         bottle.request.environ.update({

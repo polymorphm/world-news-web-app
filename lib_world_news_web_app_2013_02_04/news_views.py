@@ -102,7 +102,7 @@ def news_view(path):
         raise bottle.HTTPError(403, 'Not a Valid News Key')
     
     bottle.response.set_header('Content-Type', 'text/plain;charset=utf-8')
-    return u'o_url is <<<%r>>>' % (o_url)
+    return u'o_url is <<<%r>>>\n\n%s' % (o_url, bottle.request.environ['app.NEWS_INJECTION_HTML'])
 
 def add_route(app, root):
     app.route('%s/news' % root, callback=lambda: news_view(''))
