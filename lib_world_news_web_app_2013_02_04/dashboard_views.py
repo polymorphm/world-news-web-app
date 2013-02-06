@@ -22,17 +22,7 @@ assert str is bytes
 import base64, urllib, json
 import bottle
 from google.appengine.api import users
-from . import render, cached_fetch, news_views
-
-def dashboard_login_redirect():
-    login_url = users.create_login_url(dest_url='%s/dashboard' % bottle.request.environ['app.ROOT'])
-    
-    bottle.redirect(login_url)
-
-def logout_redirect():
-    logout_url = users.create_logout_url(dest_url='%s/' % bottle.request.environ['app.ROOT'])
-    
-    bottle.redirect(logout_url)
+from . import access, render, cached_fetch, news_views
 
 def denied_view():
     bottle.response.status = 403
@@ -48,37 +38,8 @@ def denied_view():
             denied__user_email=user_email,
             )
 
-def check_user():
-    user = users.get_current_user()
-    
-    if user is None:
-        dashboard_login_redirect()
-    
-    user_email = user.email()
-    
-    if user_email not in bottle.request.environ['app.ALLOW_ACCESS_LIST']:
-        bottle.redirect('%s/denied' % bottle.request.environ['app.ROOT'])
-    
-    return user_email
-
-def check_user_for_ajax():
-    if bottle.request.get_header('X-Requested-With') != 'XMLHttpRequest':
-        raise bottle.HTTPError(403)
-    
-    user = users.get_current_user()
-    
-    if user is None:
-        raise bottle.HTTPError(403)
-    
-    user_email = user.email()
-    
-    if user_email not in bottle.request.environ['app.ALLOW_ACCESS_LIST']:
-        raise bottle.HTTPError(403)
-    
-    return user_email
-
 def dashboard_view():
-    user_email = check_user()
+    user_email = access.check_user()
     
     news_secret_key = news_views.get_news_secret_key()
     news_secret_key_b64 = base64.b64encode(news_secret_key)
@@ -92,7 +53,7 @@ def dashboard_view():
             )
 
 def get_news_url_info_ajax():
-    check_user_for_ajax()
+    access.check_user_for_ajax()
     
     o_url = unicode(bottle.request.json.get('original_news_url'))
     news_url = news_views.get_news_url(o_url)
@@ -120,9 +81,7 @@ def get_news_url_info_ajax():
             })
 
 def add_route(app, root):
-    app.route('%s/' % root, callback=dashboard_login_redirect)
-    app.route('%s/login' % root, callback=dashboard_login_redirect)
-    app.route('%s/logout' % root, callback=logout_redirect)
+    app.route('%s/' % root, callback=access.dashboard_login_redirect)
     app.route('%s/denied' % root, callback=denied_view)
     app.route('%s/dashboard' % root, callback=dashboard_view)
     
