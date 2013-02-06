@@ -23,9 +23,7 @@ import hashlib, time
 from google.appengine.api import memcache, urlfetch
 
 FETCH_DATA_MEMCACHE_NS = 'KCwgwkO1GubMHh9t' # magic
-
-class CacheFetchError(Exception):
-    pass
+FAIL_CACHING_TIME = 300
 
 def cached_fetch(url, proc_func=None, cache_namespace=None):
     assert proc_func is None or cache_namespace is not None
@@ -40,18 +38,22 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
         return fetch_data
     
     try:
-        fetch_client = urlfetch.fetch(url, validate_certificate=True)
-    except Exception as e:
-        raise CacheFetchError('%r: %s' % (type(e), e))
-    if fetch_client.status_code != 200:
-        raise CacheFetchError('status_code != 200')
+        resp = urlfetch.fetch(url, validate_certificate=True)
+    except:
+        resp = None
+    if resp is not None and resp.status_code != 200:
+        resp = None
+    
+    if resp is None:
+        memcache.add(fetch_data_key, None, time=FAIL_CACHING_TIME, namespace=cache_namespace)
+        return
     
     fetch_data = {
             'fetch_time': time.time(),
-            'final_url': fetch_client.final_url,
-            'status_code': fetch_client.status_code,
-            'content': fetch_client.content,
-            'headers': fetch_client.headers,
+            'final_url': resp.final_url,
+            'status_code': resp.status_code,
+            'content': resp.content,
+            'headers': resp.headers,
             }
     
     if proc_func is not None:
