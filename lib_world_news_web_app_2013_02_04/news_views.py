@@ -132,24 +132,48 @@ def news_injection_proc(fetch_data):
                 repl, content, flags=re.S | re.I)
     
     def insert_base(content):
+        class IsDone(object):
+            val = False
+        is_done = IsDone()
+        
+        base_tag = u'<base href="%s" />' % html_escape.html_escape(fetch_data['final_url'])
+        
         def repl(m):
+            is_done.val = True
             return '%s%s' % (
                     m.group('tag'),
-                    '<base href="%s" />' % html_escape.html_escape(fetch_data['final_url']),
+                    base_tag.encode('utf-8', 'replace'),
                     )
         
-        return re.sub(r'(?P<tag>\<head(\s.*?)?(\/\>|\>))',
+        content = re.sub(r'(?P<tag>\<head(\s.*?)?(\/\>|\>))',
                 repl, content, count=1, flags=re.S | re.I)
+        
+        if not is_done.val:
+            is_done.val = True
+            content = '%s%s%s' % ('<!DOCTYPE html>\n\n', base_tag.encode('utf-8', 'replace'), content)
+        
+        return content
     
     def insert_inj(content):
+        class IsDone(object):
+            val = False
+        is_done = IsDone()
+        
         def repl(m):
+            is_done.val = True
             return '%s%s' % (
                     inj.encode('utf-8', 'replace'),
-                    m.group(0),
+                    m.group('tag'),
                     )
         
-        return re.sub(r'(?P<tag>\</body(\s.*?)?(\/\>|\>))',
+        content = re.sub(r'(?P<tag>\</body(\s.*?)?(\/\>|\>))',
                 repl, content, count=1, flags=re.S | re.I)
+        
+        if not is_done.val:
+            is_done.val = True
+            content = '%s%s' % (content, inj.encode('utf-8', 'replace'))
+        
+        return content
     
     fetch_data['content'] = delete_base(fetch_data['content'])
     fetch_data['content'] = replace_url(fetch_data['content'])
@@ -157,7 +181,7 @@ def news_injection_proc(fetch_data):
     fetch_data['content'] = insert_inj(fetch_data['content'])
 
 def news_injection_cache_ns():
-    hmac_key = base64.b64decode(u'xuSv5OzM7mWmxeIY') # magic
+    hmac_key = base64.b64decode(u'udZzLCvKScXei6XU') # magic
     hmac_msg = bottle.request.environ['app.NEWS_INJECTION_HTML']
     
     cache_ns = base64.b64encode(
