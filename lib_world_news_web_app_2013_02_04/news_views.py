@@ -94,7 +94,7 @@ def fetch_data_is_html(fetch_data):
     
     return False
 
-def news_injection_proc(original_news_url, fetch_data):
+def news_injection_proc(fetch_data):
     if not fetch_data_is_html(fetch_data):
         return
     
@@ -113,16 +113,18 @@ def news_injection_proc(original_news_url, fetch_data):
     
     def replace_url(content):
         def repl(m):
-            o_url = urlparse.urljoin(original_news_url, html_escape.html_unescape(m.group('url')))
+            next_o_url = urlparse.urljoin(
+                    fetch_data['final_url'],
+                    html_escape.html_unescape(m.group('url')),
+                    )
+            next_news_url = get_news_url(next_o_url)
             
-            news_url = get_news_url(o_url)
-            
-            if isinstance(news_url, unicode):
-                news_url = news_url.encode('utf-8', 'replace')
+            if isinstance(next_news_url, unicode):
+                next_news_url = next_news_url.encode('utf-8', 'replace')
             
             return '%s%s%s' % (
                     m.group('prefix'),
-                    html_escape.html_escape(news_url),
+                    html_escape.html_escape(next_news_url),
                     m.group('postfix'),
                     )
         
@@ -133,7 +135,7 @@ def news_injection_proc(original_news_url, fetch_data):
         def repl(m):
             return '%s%s' % (
                     m.group('tag'),
-                    '<base href="%s" />' % html_escape.html_escape(original_news_url),
+                    '<base href="%s" />' % html_escape.html_escape(fetch_data['final_url']),
                     )
         
         return re.sub(r'(?P<tag>\<head(\s.*?)?(\/\>|\>))',
@@ -155,7 +157,7 @@ def news_injection_proc(original_news_url, fetch_data):
     fetch_data['content'] = insert_inj(fetch_data['content'])
 
 def news_injection_cache_ns():
-    hmac_key = base64.b64decode(u'dGCSLyFIaOOHzITh') # magic
+    hmac_key = base64.b64decode(u'xuSv5OzM7mWmxeIY') # magic
     hmac_msg = bottle.request.environ['app.NEWS_INJECTION_HTML']
     
     cache_ns = base64.b64encode(
@@ -191,7 +193,7 @@ def news_view(path):
     
     fetch_data = cached_fetch.cached_fetch(
             o_url,
-            proc_func=lambda cached_fetch: news_injection_proc(o_url, cached_fetch),
+            proc_func=news_injection_proc,
             cache_namespace=news_injection_cache_ns()
             )
     
