@@ -128,8 +128,12 @@ def news_injection_proc(fetch_data):
                     m.group('postfix'),
                     )
         
-        return re.sub(r'(?P<prefix>href\s*?\=\s*?(?P<q>\"|\x27))(?P<url>.+?)(?P<postfix>\x22)',
+        content = re.sub(r'(?P<prefix>\Whref\s*?\=\s*?\")(?P<url>.+?)(?P<postfix>\")',
                 repl, content, flags=re.S | re.I)
+        content = re.sub(r'(?P<prefix>\Whref\s*?\=\s*?\x27)(?P<url>.+?)(?P<postfix>\x27)',
+                repl, content, flags=re.S | re.I)
+        
+        return content
     
     def insert_base(content):
         class IsDone(object):
@@ -181,7 +185,7 @@ def news_injection_proc(fetch_data):
     fetch_data['content'] = insert_inj(fetch_data['content'])
 
 def news_injection_cache_ns():
-    hmac_key = base64.b64decode(u'udZzLCvKScXei6XU') # magic
+    hmac_key = base64.b64decode(u'q2H846pPGfk5cyJn') # magic
     hmac_msg = bottle.request.environ['app.NEWS_INJECTION_HTML']
     
     cache_ns = base64.b64encode(
