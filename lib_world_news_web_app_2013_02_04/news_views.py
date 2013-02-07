@@ -95,10 +95,10 @@ def fetch_data_is_html(fetch_data):
     return False
 
 def news_injection_proc(original_news_url, fetch_data):
-    inj = bottle.request.environ['app.NEWS_INJECTION_HTML']
-    
     if not fetch_data_is_html(fetch_data):
         return
+    
+    inj = bottle.request.environ['app.NEWS_INJECTION_HTML']
     
     def delete_base(content):
         def repl(m):
@@ -199,7 +199,7 @@ def news_view(path):
         raise bottle.HTTPError(404, 'News Not Found (no data)')
     
     if not fetch_data_is_html(fetch_data):
-        bottle.redirect(o_url)
+        bottle.redirect(o_url, code=301)
     
     content_type = fetch_data_content_type(fetch_data)
     content = fetch_data['content']
