@@ -166,11 +166,11 @@ def news_injection_proc(fetch_data):
         def repl(m):
             is_done.val = True
             return '%s%s' % (
-                    inj.encode('utf-8', 'replace'),
                     m.group('tag'),
+                    inj.encode('utf-8', 'replace'),
                     )
         
-        content = re.sub(r'(?P<tag>\</body(\s.*?)?(\/\>|\>))',
+        content = re.sub(r'(?P<tag>\<body(\s.*?)?(\/\>|\>))',
                 repl, content, count=1, flags=re.S | re.I)
         
         if not is_done.val:
@@ -185,7 +185,7 @@ def news_injection_proc(fetch_data):
     fetch_data['content'] = insert_inj(fetch_data['content'])
 
 def news_injection_cache_ns():
-    hmac_key = base64.b64decode(u'q2H846pPGfk5cyJn') # magic
+    hmac_key = base64.b64decode(u'Y6b3ClCvslLgeCtg') # magic
     hmac_msg = bottle.request.environ['app.NEWS_INJECTION_HTML']
     
     cache_ns = base64.b64encode(
