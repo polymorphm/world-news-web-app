@@ -55,12 +55,16 @@ def get_news_url(original_news_url):
         o_path = '/%s' % o_path
     
     query_kwargs = {
-            'netloc': o_netloc or 'localhost',
             'key': base64.b64encode(get_news_key(original_news_url)),
             }
     
     if o_scheme and o_scheme != 'http':
         query_kwargs['scheme'] = o_scheme
+    
+    if o_netloc.startswith('www.'):
+        query_kwargs['wnetloc'] = o_netloc[len('www.'):]
+    elif o_netloc:
+        query_kwargs['netloc'] = o_netloc
     
     if o_query:
         query_kwargs['query'] = o_query
@@ -201,6 +205,7 @@ def news_injection_cache_ns():
 def news_view(path):
     o_scheme = bottle.request.params.get('scheme') or 'http'
     o_netloc = bottle.request.params.get('netloc')
+    o_wnetloc = bottle.request.params.get('wnetloc')
     o_path = path
     o_query = bottle.request.params.get('query')
     o_fragment = bottle.request.params.get('fragment')
@@ -209,6 +214,9 @@ def news_view(path):
         news_key = base64.b64decode(news_key_b64)
     except (TypeError, ValueError):
         news_key = None
+    
+    if not o_netloc and o_wnetloc:
+        o_netloc = 'www.%s' % o_wnetloc
     
     if not o_netloc:
         raise bottle.HTTPError(404, 'News Not Found (no netloc)')
