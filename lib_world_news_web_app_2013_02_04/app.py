@@ -19,7 +19,7 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
-import os.path, ConfigParser, base64
+import os.path, itertools, ConfigParser, base64
 import bottle
 from mako import lookup as mako_lookup
 from . import access, dashboard_views, news_views
@@ -46,7 +46,10 @@ def get_config_allow_list(conf_parser, config_file):
     else:
         allow_access_list = u''
     
-    allow_access_list = tuple(x.strip() for x in allow_access_list.split(','))
+    allow_access_list = tuple(itertools.ifilter(
+            None,
+            (x.strip() for x in allow_access_list.split(',')),
+            ))
     
     return allow_access_list
 
