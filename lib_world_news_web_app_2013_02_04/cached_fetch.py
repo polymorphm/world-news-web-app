@@ -22,7 +22,7 @@ assert str is bytes
 import hashlib, time
 from google.appengine.api import memcache, urlfetch
 
-FETCH_DATA_MEMCACHE_NS = 'KCwgwkO1GubMHh9t' # magic
+FETCH_DATA_MEMCACHE_NS = 'P7gznlyTXa6CNCWZ' # magic
 FAIL_CACHING_TIME = 300
 
 def cached_fetch(url, proc_func=None, cache_namespace=None):
@@ -49,8 +49,9 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
         return
     
     fetch_data = {
+            'url': url,
             'fetch_time': time.time(),
-            'final_url': resp.final_url,
+            'final_url': resp.final_url or url,
             'status_code': resp.status_code,
             'content': resp.content,
             'headers': resp.headers,
