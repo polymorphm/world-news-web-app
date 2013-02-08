@@ -103,6 +103,7 @@ def news_injection_proc(fetch_data):
         return
     
     inj = bottle.request.environ['app.NEWS_INJECTION_HTML']
+    assert isinstance(inj, unicode)
     
     def delete_base(content):
         def repl(m):
@@ -183,14 +184,20 @@ def news_injection_proc(fetch_data):
         
         return content
     
+    assert isinstance(fetch_data['content'], bytes)
+    
     fetch_data['content'] = delete_base(fetch_data['content'])
     fetch_data['content'] = replace_url(fetch_data['content'])
     fetch_data['content'] = insert_base(fetch_data['content'])
     fetch_data['content'] = insert_inj(fetch_data['content'])
+    
+    assert isinstance(fetch_data['content'], bytes)
 
 def news_injection_cache_ns():
     hmac_key = base64.b64decode(u'Y6b3ClCvslLgeCtg') # magic
-    hmac_msg = bottle.request.environ['app.NEWS_INJECTION_HTML']
+    hmac_msg_u = bottle.request.environ['app.NEWS_INJECTION_HTML']
+    assert isinstance(hmac_msg_u, unicode)
+    hmac_msg = hmac_msg_u.encode('utf-8', 'replace')
     
     cache_ns = base64.b64encode(
             hmac.new(
