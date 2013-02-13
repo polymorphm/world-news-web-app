@@ -51,6 +51,8 @@ def get_news_url(original_news_url):
     o_scheme, o_netloc, o_path, o_query, o_fragment = \
             urlparse.urlsplit(original_news_url)
     
+    o_netloc = o_netloc.replace('.', '_')
+    
     if o_path and not o_path.startswith('/'):
         o_path = '/%s' % o_path
     
@@ -61,8 +63,8 @@ def get_news_url(original_news_url):
     if o_scheme and o_scheme != 'http':
         query_kwargs['scheme'] = o_scheme
     
-    if o_netloc.startswith('www.'):
-        query_kwargs['wnetloc'] = o_netloc[len('www.'):]
+    if o_netloc.startswith('www_'):
+        query_kwargs['wnetloc'] = o_netloc[len('www_'):]
     elif o_netloc:
         query_kwargs['netloc'] = o_netloc
     
@@ -227,6 +229,8 @@ def news_view(path):
     
     if not o_netloc:
         raise bottle.HTTPError(404, 'News Not Found (no netloc)')
+    
+    o_netloc = o_netloc.replace('_', '.')
     
     o_url = urlparse.urlunsplit((o_scheme, o_netloc, o_path, o_query, o_fragment))
     valid_news_key = get_news_key(o_url)
