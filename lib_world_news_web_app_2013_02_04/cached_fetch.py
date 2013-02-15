@@ -22,14 +22,14 @@ assert str is bytes
 import hashlib, time
 from google.appengine.api import memcache, urlfetch
 
-FETCH_DATA_MEMCACHE_NS = 'P7gznlyTXa6CNCWZ' # magic
+FETCH_DATA_BY_URL_MEMCACHE_NS = 'P7gznlyTXa6CNCWZ' # magic
 FAIL_CACHING_TIME = 300
 
 def cached_fetch(url, proc_func=None, cache_namespace=None):
     assert proc_func is None or cache_namespace is not None
     
     if cache_namespace is None:
-        cache_namespace = FETCH_DATA_MEMCACHE_NS
+        cache_namespace = FETCH_DATA_BY_URL_MEMCACHE_NS
     
     fetch_data_key = hashlib.sha256(url).hexdigest()
     fetch_data = memcache.get(fetch_data_key, namespace=cache_namespace)
