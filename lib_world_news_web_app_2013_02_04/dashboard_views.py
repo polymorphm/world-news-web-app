@@ -53,6 +53,9 @@ def dashboard_view():
             )
 
 def get_news_url_info_ajax():
+    if not bottle.request.is_xhr or bottle.request.json is None:
+        raise bottle.HTTPError(403)
+    
     access.check_user_for_ajax()
     
     o_url = unicode(bottle.request.json.get('original_news_url'))

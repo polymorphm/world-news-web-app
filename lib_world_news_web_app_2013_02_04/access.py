@@ -46,9 +46,6 @@ def check_user():
     return user_email
 
 def check_user_for_ajax():
-    if not bottle.request.is_xhr:
-        raise bottle.HTTPError(403)
-    
     user = users.get_current_user()
     
     if user is None:
