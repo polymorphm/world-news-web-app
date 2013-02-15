@@ -38,7 +38,7 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
         return fetch_data
     
     try:
-        resp = urlfetch.fetch(url, validate_certificate=True)
+        resp = urlfetch.fetch(url, validate_certificate=False, deadline=1)
     except:
         resp = None
     if resp is not None and resp.status_code != 200:
