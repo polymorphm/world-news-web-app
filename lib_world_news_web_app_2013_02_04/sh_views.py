@@ -45,12 +45,10 @@ def new_sh_name(o_url):
     if sh_name is not None:
         return sh_name
     
-    for other_sh in ShEntity.query(ShEntity.o_url == o_url).iter():
+    for other_sh in ShEntity.query(ShEntity.o_url == o_url).fetch(1):
         sh_name = other_sh.sh_name
         
         memcache.add(o_url, sh_name, namespace=SH_NAME_BY_O_URL_MEMCACHE_NS)
-        memcache.add(sh_name, o_url, namespace=SH_O_URL_BY_NAME_MEMCACHE_NS)
-        
         return sh_name
     
     SH_NAME_CH_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
@@ -64,7 +62,7 @@ def new_sh_name(o_url):
         for other_sh in ShEntity.query(
                 ShEntity.sh_name == sh_name,
                 ShEntity.o_url != o_url,
-                ).iter():
+                ).fetch(1):
             break
         else:
             break
@@ -75,6 +73,7 @@ def new_sh_name(o_url):
         sh.sh_name = sh_name
         sh.put()
     
+    memcache.add(o_url, sh_name, namespace=SH_NAME_BY_O_URL_MEMCACHE_NS)
     return sh_name
 
 def new_micro_news_url(o_url):
@@ -126,18 +125,13 @@ def sh_view(sh_name):
     if o_url is not None:
         do_redirect(o_url)
     
-    for sh in ShEntity.query(ShEntity.sh_name == sh_name).iter():
+    for sh in ShEntity.query(ShEntity.sh_name == sh_name).fetch(1):
         o_url = sh.o_url
         
-        memcache.add(o_url, sh_name, namespace=SH_NAME_BY_O_URL_MEMCACHE_NS)
         memcache.add(sh_name, o_url, namespace=SH_O_URL_BY_NAME_MEMCACHE_NS)
-        
         do_redirect(o_url)
     
-    if o_url is None:
-        raise bottle.HTTPError(404, 'Page Not Found')
-    
-    do_redirect(o_url)
+    raise bottle.HTTPError(404, 'Page Not Found')
 
 def add_route(app, root):
     app.post('%s/api/sh/new' % root, callback=api_sh_new_view)
