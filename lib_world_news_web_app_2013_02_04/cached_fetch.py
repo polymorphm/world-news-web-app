@@ -34,7 +34,7 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
     fetch_data_key = hashlib.sha256(url).hexdigest()
     fetch_data = memcache.get(fetch_data_key, namespace=cache_namespace)
     
-    if fetch_data is not None:
+    if fetch_data is not None and not fetch_data.get('fail', False):
         return fetch_data
     
     try:
@@ -45,10 +45,11 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
         resp = None
     
     if resp is None:
-        memcache.add(fetch_data_key, None, time=FAIL_CACHING_TIME, namespace=cache_namespace)
+        memcache.add(fetch_data_key, {'fail': True}, time=FAIL_CACHING_TIME, namespace=cache_namespace)
         return
     
     fetch_data = {
+            'fail': False,
             'url': url,
             'fetch_time': time.time(),
             'final_url': resp.final_url or url,
