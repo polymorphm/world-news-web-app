@@ -78,8 +78,7 @@ def get_news_url_info_ajax():
             })
 
 def add_route(app, root):
+    app.post('%s/ajax/get-news-url-info' % root, callback=get_news_url_info_ajax)
     app.route('%s/' % root, callback=access.dashboard_login_redirect)
     app.route('%s/denied' % root, callback=denied_view)
     app.route('%s/dashboard' % root, callback=dashboard_view)
-    
-    app.post('%s/ajax/get-news-url-info' % root, callback=get_news_url_info_ajax)
