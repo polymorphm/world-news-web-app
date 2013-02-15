@@ -22,7 +22,7 @@ assert str is bytes
 import os.path, itertools, ConfigParser, base64
 import bottle
 from mako import lookup as mako_lookup
-from . import access, dashboard_views, news_views
+from . import access, dashboard_views, news_views, sh_views
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), 'static')
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
@@ -120,5 +120,6 @@ def create_app(root=None, static_root=None, config_file=None):
     access.add_route(app, root)
     dashboard_views.add_route(app, root)
     news_views.add_route(app, root)
+    sh_views.add_route(app, root)
     
     return app

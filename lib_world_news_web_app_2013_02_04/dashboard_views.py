@@ -19,10 +19,10 @@ from __future__ import absolute_import
 assert unicode is not str
 assert str is bytes
 
-import base64, urllib, json
+import base64, json
 import bottle
 from google.appengine.api import users
-from . import access, render, cached_fetch, news_views
+from . import access, render, sh_views, news_views
 
 def denied_view():
     bottle.response.status = 403
@@ -59,16 +59,7 @@ def get_news_url_info_ajax():
     news_url = news_views.get_news_url(o_url)
     news_key = base64.b64encode(news_views.get_news_key(o_url))
     
-    fetch_data = cached_fetch.cached_fetch(
-            'http://clck.ru/--?%s' % urllib.urlencode({
-                    'url': news_url,
-                    }),
-            )
-    
-    if fetch_data is not None and fetch_data['status_code'] == 200:
-        micro_news_url = fetch_data['content'].decode('utf-8', 'replace').strip()
-    else:
-        micro_news_url = None
+    micro_news_url = sh_views.new_micro_news_url(o_url)
     
     bottle.response.set_header('Content-Type', 'application/json;charset=utf-8')
     return json.dumps({
