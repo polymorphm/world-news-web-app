@@ -107,6 +107,10 @@ def news_injection_proc(fetch_data):
     inj = bottle.request.environ['app.NEWS_INJECTION_HTML']
     assert isinstance(inj, unicode)
     
+    final_url = fetch_data['final_url']
+    if isinstance(final_url, bytes):
+        final_url = final_url.decode('utf-8', 'replace')
+    
     def delete_base(content):
         def repl(m):
             return '%s%s%s' % (
@@ -121,7 +125,7 @@ def news_injection_proc(fetch_data):
     def replace_url(content):
         def repl(m):
             next_o_url = urlparse.urljoin(
-                    fetch_data['final_url'],
+                    final_url,
                     html_escape.html_unescape(m.group('url')),
                     )
             next_news_url = get_news_url(next_o_url)
@@ -147,7 +151,7 @@ def news_injection_proc(fetch_data):
             val = False
         is_done = IsDone()
         
-        base_tag = u'<base href="%s" />' % html_escape.html_escape(fetch_data['final_url'])
+        base_tag = u'<base href="%s" />' % html_escape.html_escape(final_url)
         
         def repl(m):
             is_done.val = True
