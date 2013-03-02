@@ -130,9 +130,9 @@ def sh_view(sh_name):
     
     if USE_MEMCACHE:
         o_url = memcache.get(sh_name, namespace=SH_O_URL_BY_NAME_MEMCACHE_NS)
-    
-    if o_url is not None:
-        do_redirect(o_url)
+        
+        if o_url is not None:
+            do_redirect(o_url)
     
     for sh in ShEntity.query(ShEntity.sh_name == sh_name).fetch(1):
         o_url = sh.o_url
