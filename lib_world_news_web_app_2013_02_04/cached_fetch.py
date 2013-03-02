@@ -24,6 +24,7 @@ from google.appengine.api import memcache, urlfetch
 
 FETCH_DATA_BY_URL_MEMCACHE_NS = 'P7gznlyTXa6CNCWZ' # magic
 FAIL_CACHING_TIME = 300
+CONTENT_LEN_LIMIT = 900000 # memcache can not save over 1000000
 
 def cached_fetch(url, proc_func=None, cache_namespace=None):
     assert proc_func is None or cache_namespace is not None
@@ -41,7 +42,8 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
         resp = urlfetch.fetch(url, validate_certificate=False)
     except:
         resp = None
-    if resp is not None and resp.status_code != 200:
+    if resp is not None and (
+            resp.status_code != 200 or len(resp.content) > CONTENT_LEN_LIMIT):
         resp = None
     
     if resp is None:
