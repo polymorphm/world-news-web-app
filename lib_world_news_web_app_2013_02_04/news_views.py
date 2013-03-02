@@ -125,7 +125,7 @@ def news_injection_proc(fetch_data):
     def replace_url(content):
         def repl(m):
             next_o_url = urlparse.urljoin(
-                    final_url,
+                    final_url.encode('utf-8', 'replace'),
                     html_escape.html_unescape(m.group('url')),
                     )
             next_news_url = get_news_url(next_o_url)
