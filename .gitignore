@@ -11,3 +11,4 @@ __pycache__
 # gae
 /site-packages
 /app.yaml
+/index.yaml
