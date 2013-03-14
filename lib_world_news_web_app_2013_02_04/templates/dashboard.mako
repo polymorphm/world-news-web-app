@@ -4,7 +4,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+        <meta http-equiv="X-Frame-Options" content="DENY" />
         <meta http-equiv="X-Ua-Compatible" content="chrome=1" />
         <script src="${request.environ['app.STATIC_ROOT'] | h}/js/google_chrome_frame_for_microsoft_ie.js"></script>
         <title>Dashboard | ${request.environ['app.DEFAULT_TITLE'] | h}</title>
