@@ -29,7 +29,7 @@ def render(tpl_name, **kwargs):
     tpl_kwargs.update(kwargs)
     
     bottle.response.set_header('Content-Type', 'text/html;charset=utf-8')
-    bottle.response.set_header('X-Frame-Options', 'SAMEORIGIN')
+    bottle.response.set_header('X-Frame-Options', 'DENY')
     bottle.response.set_header('X-Ua-Compatible', 'chrome=1')
     
     return template.render(**tpl_kwargs)
