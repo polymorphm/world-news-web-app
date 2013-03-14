@@ -77,6 +77,23 @@ def get_news_injection_html(conf_parser, config_file):
     
     return news_injection_html
 
+def get_home_page_html(conf_parser, config_file):
+    if not conf_parser.has_option('core', 'home_page_file'):
+        return u''
+    
+    home_page_file = \
+            conf_parser.get('core', 'home_page_file').decode('utf-8', 'replace')
+    
+    home_page_file = os.path.join(
+            os.path.dirname(config_file),
+            home_page_file,
+            )
+    
+    with open(home_page_file, 'rb') as fd:
+        home_page_html = fd.read().decode('utf-8', 'replace')
+    
+    return home_page_html
+
 def create_app(root=None, static_root=None, config_file=None):
     assert root is not None
     assert static_root is not None
@@ -88,6 +105,7 @@ def create_app(root=None, static_root=None, config_file=None):
     allow_access_list = get_config_allow_list(conf_parser, config_file)
     initial_secret_key = get_config_initial_secret_key(conf_parser, config_file)
     news_injection_html = get_news_injection_html(conf_parser, config_file)
+    home_page_html = get_home_page_html(conf_parser, config_file)
     
     template_lookup = mako_lookup.TemplateLookup(directories=(TEMPLATES_DIR, ))
     
@@ -98,6 +116,7 @@ def create_app(root=None, static_root=None, config_file=None):
                 'app.ALLOW_ACCESS_LIST': allow_access_list,
                 'app.INITIAL_SECRET_KEY': initial_secret_key,
                 'app.NEWS_INJECTION_HTML': news_injection_html,
+                'app.HOME_PAGE_HTML': home_page_html,
                 })
         
         bottle.request.environ.update({

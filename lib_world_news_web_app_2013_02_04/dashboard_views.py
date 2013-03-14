@@ -38,6 +38,16 @@ def denied_view():
             denied__user_email=user_email,
             )
 
+def home_view():
+    if not bottle.request.environ['app.HOME_PAGE_HTML']:
+        access.dashboard_login_redirect()
+    
+    bottle.response.set_header('Content-Type', 'text/html;charset=utf-8')
+    bottle.response.set_header('X-Frame-Options', 'DENY')
+    bottle.response.set_header('X-Ua-Compatible', 'chrome=1')    
+    
+    return bottle.request.environ['app.HOME_PAGE_HTML']
+
 def dashboard_view():
     user_email = access.check_user()
     
@@ -73,6 +83,6 @@ def get_news_url_info_ajax():
 
 def add_route(app, root):
     app.post('%s/ajax/get-news-url-info' % root, callback=get_news_url_info_ajax)
-    app.route('%s/' % root, callback=access.dashboard_login_redirect)
+    app.route('%s/' % root, callback=home_view)
     app.route('%s/denied' % root, callback=denied_view)
     app.route('%s/dashboard' % root, callback=dashboard_view)

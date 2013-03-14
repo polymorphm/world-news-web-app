@@ -7,6 +7,8 @@ __pycache__
 /start_world_news_web_app_2013_02_04.py
 /world-news.cfg
 /news_injection.html
+/home_page.html
+/lib_world_news_web_app_2013_02_04/static/home_page/
 
 # gae
 /site-packages
