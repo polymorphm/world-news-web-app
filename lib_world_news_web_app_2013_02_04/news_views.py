@@ -232,7 +232,12 @@ def news_view(path):
         o_netloc = 'www.%s' % o_wnetloc
     
     if not o_netloc:
-        raise bottle.HTTPError(404, 'News Not Found (no netloc)')
+        bottle.response.status = 404
+        
+        return render.render(
+                'news_not_found.mako',
+                news_not_found__info='netloc is absent',
+                )
     
     o_netloc = o_netloc.replace('_', '.')
     
@@ -240,7 +245,12 @@ def news_view(path):
     valid_news_key = get_news_key(o_url)
     
     if not news_key or valid_news_key != news_key:
-        raise bottle.HTTPError(403, 'Not a Valid News Key')
+        bottle.response.status = 404
+        
+        return render.render(
+                'news_not_found.mako',
+                news_not_found__info='not a valid news key',
+                )
     
     fetch_data = cached_fetch.cached_fetch(
             o_url,
@@ -249,7 +259,12 @@ def news_view(path):
             )
     
     if fetch_data is None:
-        raise bottle.HTTPError(404, 'News Not Found (no data)')
+        bottle.response.status = 404
+        
+        return render.render(
+                'news_not_found.mako',
+                news_not_found__info='data is absent',
+                )
     
     if not fetch_data_is_html(fetch_data):
         bottle.redirect(o_url, code=301)
