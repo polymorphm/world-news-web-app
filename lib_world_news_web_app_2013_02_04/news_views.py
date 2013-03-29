@@ -124,11 +124,21 @@ def news_injection_proc(fetch_data):
     
     def replace_url(content):
         def repl(m):
-            next_o_url = urlparse.urljoin(
-                    final_url.encode('utf-8', 'replace'),
-                    html_escape.html_unescape(m.group('url')),
-                    )
-            next_news_url = get_news_url(next_o_url)
+            try:
+                next_o_url = urlparse.urljoin(
+                        final_url.encode('utf-8', 'replace'),
+                        html_escape.html_unescape(m.group('url')),
+                        )
+            except ValueError:
+                next_o_url = final_url.encode('utf-8', 'replace')
+            try:
+                next_news_url = get_news_url(next_o_url)
+            except ValueError:
+                next_news_url = news_url = '%s://%s%s' % (
+                        bottle.request.environ.get('wsgi.url_scheme') or 'http',
+                        bottle.request.environ.get('HTTP_HOST') or 'localhost',
+                        bottle.request.environ['app.ROOT'],
+                        )
             
             if isinstance(next_news_url, unicode):
                 next_news_url = next_news_url.encode('utf-8', 'replace')
