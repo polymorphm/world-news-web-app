@@ -63,6 +63,12 @@ def cached_fetch(url, proc_func=None, cache_namespace=None):
     if proc_func is not None:
         proc_func(fetch_data)
     
-    memcache.add(fetch_data_key, fetch_data, namespace=cache_namespace)
+    try:
+        memcache.add(fetch_data_key, fetch_data, namespace=cache_namespace)
+    except ValueError:
+        # typical: "Values may not be more than 1000000 bytes in length ..."
+        
+        memcache.add(fetch_data_key, {'fail': True}, time=FAIL_CACHING_TIME, namespace=cache_namespace)
+        return
     
     return fetch_data
