@@ -26,11 +26,10 @@ from google.appengine.api import memcache
 from . import news_views
 
 SH_ENTITY_KIND_NS = 'bjE4fVnYcryOs3Ro' # magic
-USE_MEMCACHE = False # XXX may be we need to delete all memcache-touching code from this module?
+USE_MEMCACHE = True
 
 if USE_MEMCACHE:
     SH_O_URL_BY_NAME_MEMCACHE_NS = 's8m6LBqjDkoVZCAk' # magic
-    SH_NAME_BY_O_URL_MEMCACHE_NS = 'WrRJc9J1K2VIuKAj' # magic
 
 class ShEntity(ndb.Model):
     sh_name = ndb.StringProperty()
@@ -43,17 +42,8 @@ class ShEntity(ndb.Model):
 def new_sh_name(o_url):
     assert isinstance(o_url, unicode)
     
-    if USE_MEMCACHE:
-        sh_name = memcache.get(o_url, namespace=SH_NAME_BY_O_URL_MEMCACHE_NS)
-        
-        if sh_name is not None:
-            return sh_name
-    
     for other_sh in ShEntity.query(ShEntity.o_url == o_url).fetch(1):
         sh_name = other_sh.sh_name
-        
-        if USE_MEMCACHE:
-            memcache.add(o_url, sh_name, namespace=SH_NAME_BY_O_URL_MEMCACHE_NS)
         
         return sh_name
     
@@ -80,7 +70,7 @@ def new_sh_name(o_url):
         sh.put()
     
     if USE_MEMCACHE:
-        memcache.add(o_url, sh_name, namespace=SH_NAME_BY_O_URL_MEMCACHE_NS)
+        memcache.add(sh_name, o_url, namespace=SH_O_URL_BY_NAME_MEMCACHE_NS)
     
     return sh_name
 
