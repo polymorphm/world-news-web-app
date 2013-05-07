@@ -101,9 +101,6 @@ def fetch_data_is_html(fetch_data):
     return False
 
 def news_injection_proc(fetch_data):
-    if not fetch_data_is_html(fetch_data):
-        return
-    
     inj = bottle.request.environ['app.NEWS_INJECTION_HTML']
     assert isinstance(inj, unicode)
     
@@ -209,6 +206,13 @@ def news_injection_proc(fetch_data):
     
     assert isinstance(fetch_data['content'], bytes)
 
+def cached_fetch_proc(fetch_data):
+    if not fetch_data_is_html(fetch_data):
+        fetch_data['content'] = None
+        return
+    
+    news_injection_proc(fetch_data)
+
 def news_injection_cache_ns():
     hmac_key = base64.b64decode(u'Y6b3ClCvslLgeCtg') # magic
     hmac_msg_u = bottle.request.environ['app.NEWS_INJECTION_HTML']
@@ -264,7 +268,7 @@ def news_view(path):
     
     fetch_data = cached_fetch.cached_fetch(
             o_url,
-            proc_func=news_injection_proc,
+            proc_func=cached_fetch_proc,
             cache_namespace=news_injection_cache_ns()
             )
     
