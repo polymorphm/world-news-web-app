@@ -266,6 +266,15 @@ def news_view(path):
                 news_not_found__info='not a valid news key',
                 )
     
+    if o_path.endswith('.css') or o_path.endswith('.CSS') or \
+            o_path.endswith('.js') or o_path.endswith('.JS') or \
+            o_path.endswith('.jpg') or o_path.endswith('.JPG') or \
+            o_path.endswith('.png') or o_path.endswith('.PNG') or \
+            o_path.endswith('.gif') or o_path.endswith('.GIF') or \
+            o_path.endswith('.webp') or o_path.endswith('.WEBP') or \
+            o_path.endswith('.webm') or o_path.endswith('.WEBM'):
+        bottle.redirect(o_url, code=301)
+    
     fetch_data = cached_fetch.cached_fetch(
             o_url,
             proc_func=cached_fetch_proc,
