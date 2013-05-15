@@ -255,6 +255,14 @@ def news_view(path):
     
     o_netloc = o_netloc.replace('_', '.')
     
+    if o_netloc in bottle.request.environ['app.NETLOC_BLACKLIST']:
+        bottle.response.status = 404
+        
+        return render.render(
+                'news_not_found.mako',
+                news_not_found__info='netloc in blacklist',
+                )
+    
     o_url = urlparse.urlunsplit((o_scheme, o_netloc, o_path, o_query, o_fragment))
     valid_news_key = get_news_key(o_url)
     

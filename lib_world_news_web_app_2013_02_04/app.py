@@ -94,6 +94,20 @@ def get_home_page_html(conf_parser, config_file):
     
     return home_page_html
 
+def get_netloc_blacklist(conf_parser, config_file):
+    if conf_parser.has_option('core', 'netloc_blacklist'):
+        netloc_blacklist = \
+                conf_parser.get('core', 'netloc_blacklist').decode('utf-8', 'replace')
+    else:
+        netloc_blacklist = u''
+    
+    netloc_blacklist = tuple(itertools.ifilter(
+            None,
+            (x.strip() for x in netloc_blacklist.split(',')),
+            ))
+    
+    return netloc_blacklist
+
 def create_app(root=None, static_root=None, config_file=None):
     assert root is not None
     assert static_root is not None
@@ -106,6 +120,7 @@ def create_app(root=None, static_root=None, config_file=None):
     initial_secret_key = get_config_initial_secret_key(conf_parser, config_file)
     news_injection_html = get_news_injection_html(conf_parser, config_file)
     home_page_html = get_home_page_html(conf_parser, config_file)
+    netloc_blacklist = get_netloc_blacklist(conf_parser, config_file)
     
     template_lookup = mako_lookup.TemplateLookup(directories=(TEMPLATES_DIR, ))
     
@@ -117,6 +132,7 @@ def create_app(root=None, static_root=None, config_file=None):
                 'app.INITIAL_SECRET_KEY': initial_secret_key,
                 'app.NEWS_INJECTION_HTML': news_injection_html,
                 'app.HOME_PAGE_HTML': home_page_html,
+                'app.NETLOC_BLACKLIST': netloc_blacklist,
                 })
         
         bottle.request.environ.update({
