@@ -42,10 +42,13 @@ class ShEntity(ndb.Model):
 def new_sh_name(o_url):
     assert isinstance(o_url, unicode)
     
-    for other_sh in ShEntity.query(ShEntity.o_url == o_url).fetch(1):
-        sh_name = other_sh.sh_name
+    if len(o_url) < 200:
+        # XXX large URL may raise error when search it
         
-        return sh_name
+        for other_sh in ShEntity.query(ShEntity.o_url == o_url).fetch(1):
+            sh_name = other_sh.sh_name
+            
+            return sh_name
     
     SH_NAME_CH_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
     sh_name = ''
