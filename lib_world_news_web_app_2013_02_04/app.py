@@ -36,6 +36,9 @@ def static_view(filename):
 def favicon_view():
     bottle.redirect(bottle.request.environ['app.FAVICON'])
 
+def robots_view():
+    bottle.redirect(bottle.request.environ['app.ROBOTS'])
+
 class Config(object):
     pass
 
@@ -143,6 +146,7 @@ def create_app(root=None, static_root=None, config_file=None):
                 'app.DEFAULT_DESCRIPTION': u'World News',
                 'app.DEFAULT_KEYWORDS': u'news, world',
                 'app.FAVICON': '%s/favicon.png' % bottle.request.environ['app.STATIC_ROOT'],
+                'app.ROBOTS': '%s/robots.txt' % bottle.request.environ['app.STATIC_ROOT'],
                 })
     
     app = bottle.Bottle()
@@ -151,6 +155,7 @@ def create_app(root=None, static_root=None, config_file=None):
     
     app.route('%s/<filename:path>' % static_root, callback=static_view)
     app.route('%s/favicon.ico' % root, callback=favicon_view)
+    app.route('%s/robots.txt' % root, callback=robots_view)
     
     access.add_route(app, root)
     dashboard_views.add_route(app, root)
