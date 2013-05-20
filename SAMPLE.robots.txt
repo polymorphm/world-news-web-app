@@ -1,0 +1,7 @@
+# robots.txt generated at http://www.mcanerin.com
+User-agent: MSNBot
+Disallow: /
+User-agent: psbot
+Disallow: /
+User-agent: *
+Disallow: 
