@@ -1,4 +1,4 @@
-application: world-news-devel
+application: world-news-example
 version: devel
 runtime: python27
 api_version: 1
